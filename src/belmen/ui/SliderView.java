@@ -1,5 +1,7 @@
 package belmen.ui;
 
+import java.lang.ref.WeakReference;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -9,7 +11,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.VelocityTracker;
@@ -64,7 +65,7 @@ public class SliderView extends ViewGroup {
     private OnDrawerScrollListener mOnDrawerScrollListener;
     private OnSlideToEndListener mOnSlideToEndListener;
 
-    private final Handler mHandler = new SlidingHandler();
+    private final Handler mHandler = new SlidingHandler(this);
     private float mAnimatedAcceleration;
     private float mAnimatedVelocity;
     private float mAnimationPosition;
@@ -226,7 +227,7 @@ public class SliderView extends ViewGroup {
         if (mTracking || mAnimating) {
             final Bitmap cache = mContent.getDrawingCache();
             if (cache != null) {
-            	Log.i(TAG, "Slider drawwithcache");
+            	Logger.i(TAG, "Slider drawwithcache");
                 if (isVertical) {
                     canvas.drawBitmap(cache, 0, handle.getBottom(), null);
                 } else {
@@ -394,15 +395,9 @@ public class SliderView extends ViewGroup {
                     final int left = mHandle.getLeft();
 
                     if (Math.abs(velocity) < mMaximumTapVelocity) {
-                        if (vertical ? (mExpanded && top < mTapThreshold + mTopOffset) ||
-                                (!mExpanded && top > mBottomOffset + getBottom() - getTop() -
-                                        mHandleHeight - mTapThreshold) :
-                                (/*mExpanded && */left < mTapThreshold + mTopOffset) ||
-                                (/*!mExpanded && */left > mBottomOffset + getRight() - getLeft() -
-                                        mHandleWidth - mTapThreshold)) {
-
+                        if (isSingleTap(vertical, top, left)) {
                             if (mAllowSingleTap) {
-                            	Log.i(TAG, "Slider SingleTap");
+                            	Logger.i(TAG, "Slider SingleTap");
                                 playSoundEffect(SoundEffectConstants.CLICK);
 
                                 if (mExpanded) {
@@ -426,6 +421,24 @@ public class SliderView extends ViewGroup {
         }
 
         return mTracking || mAnimating || super.onTouchEvent(event);
+    }
+    
+    private boolean isSingleTap(boolean vertical, int top, int left) {
+    	if(mReverse) {
+    		return vertical ? (mExpanded && top < mTapThreshold + mTopOffset) ||
+                (!mExpanded && top > mBottomOffset + getBottom() - getTop() -
+                        mHandleHeight - mTapThreshold) :
+                (!mExpanded && left < mTapThreshold + mTopOffset) ||
+                (mExpanded && left > mBottomOffset + getRight() - getLeft() -
+                        mHandleWidth - mTapThreshold);
+    	} else {
+    		return vertical ? (mExpanded && top < mTapThreshold + mTopOffset) ||
+                (!mExpanded && top > mBottomOffset + getBottom() - getTop() -
+                        mHandleHeight - mTapThreshold) :
+                (mExpanded && left < mTapThreshold + mTopOffset) ||
+                (!mExpanded && left > mBottomOffset + getRight() - getLeft() -
+                        mHandleWidth - mTapThreshold);
+    	}
     }
 
     private void animateClose(int position) {
@@ -566,7 +579,7 @@ public class SliderView extends ViewGroup {
 
     private void moveHandle(int position) {
         final ImageView handle = mHandle;
-        Log.i(TAG, "Slider moveHandle=" + position);
+        Logger.i(TAG, "Slider moveHandle=" + position);
         if (mVertical) {
             if (position == EXPANDED_FULL_OPEN) {
                 handle.offsetTopAndBottom(mTopOffset - handle.getTop());
@@ -704,7 +717,7 @@ public class SliderView extends ViewGroup {
         	final int start = mBottomOffset + (mVertical ? getHeight() : getWidth()) - 1;
         	final int end = mTopOffset;
             incrementAnimation();
-            Log.i(TAG, "Slider AnimationPosition" + mAnimationPosition);
+            Logger.i(TAG, "Slider AnimationPosition" + mAnimationPosition);
             if (mAnimationPosition >= start) {
                 mAnimating = false;
                 if(mReverse) {
@@ -998,11 +1011,22 @@ public class SliderView extends ViewGroup {
         }
     }
 
-    private class SlidingHandler extends Handler {
+    private static class SlidingHandler extends Handler {
+    	
+    	private WeakReference<SliderView> mReference = null;
+    	
+    	public SlidingHandler(SliderView view) {
+    		mReference = new WeakReference<SliderView>(view);
+    	}
+    	
         public void handleMessage(Message m) {
+        	SliderView view = mReference.get();
+        	if(view == null) {
+        		return;
+        	}
             switch (m.what) {
                 case MSG_ANIMATE:
-                    doAnimation();
+                    view.doAnimation();
                     break;
             }
         }
