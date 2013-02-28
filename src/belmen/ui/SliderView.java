@@ -62,6 +62,7 @@ public class SliderView extends ViewGroup {
     private OnDrawerOpenListener mOnDrawerOpenListener;
     private OnDrawerCloseListener mOnDrawerCloseListener;
     private OnDrawerScrollListener mOnDrawerScrollListener;
+    private OnSlideToEndListener mOnSlideToEndListener;
 
     private final Handler mHandler = new SlidingHandler();
     private float mAnimatedAcceleration;
@@ -115,7 +116,11 @@ public class SliderView extends ViewGroup {
          */
         public void onScrollEnded();
     }
-	
+    
+    public static interface OnSlideToEndListener {
+    	public void onSlideToEnd();
+    	public void onLeaveEnd();
+    }
 	public SliderView(Context context, AttributeSet attrs) {
 		this(context, attrs, 0);
 	}
@@ -439,7 +444,7 @@ public class SliderView extends ViewGroup {
 
         if (mExpanded) {
             if (always || sufficientToRetract(position, velocity)) {
-            	// ´ò¿ª×´Ì¬£º¹Ø±Õ
+            	// ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½Ø±ï¿½
                 // We are expanded, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the expanded position.
             	if(mReverse) {
@@ -454,7 +459,7 @@ public class SliderView extends ViewGroup {
                     }
             	}
             } else {
-            	// ´ò¿ª×´Ì¬£º¸´Î»
+            	// ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½Î»
                 // We are expanded and are now going to animate away.
             	if(mReverse) {
             		mAnimatedAcceleration = mMaximumAcceleration;
@@ -470,7 +475,7 @@ public class SliderView extends ViewGroup {
             }
         } else {
             if (!always && sufficientToExpand(position, velocity)) {
-            	// ¹Ø±Õ×´Ì¬£ºËõ»ØÈ¥
+            	// ï¿½Ø±ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¥
                 // We are collapsed, and they moved enough to allow us to expand.
             	if(mReverse) {
             		mAnimatedAcceleration = -mMaximumAcceleration;
@@ -484,7 +489,7 @@ public class SliderView extends ViewGroup {
                     }
             	}
             } else {
-            	// ¹Ø±Õ×´Ì¬£º¼ÌÐø´ò¿ª
+            	// ï¿½Ø±ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 // We are collapsed, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the collapsed position.
             	if(mReverse) {
@@ -597,10 +602,11 @@ public class SliderView extends ViewGroup {
                 if(mReverse) {
                 	handle.offsetLeftAndRight(mBottomOffset + getRight() - getLeft() -
                             mHandleWidth - handle.getLeft());
-                	handle.setImageResource(R.drawable.grabber_reverse);
                 } else {
                 	handle.offsetLeftAndRight(mTopOffset - handle.getLeft());
-                	handle.setImageResource(R.drawable.grabber);
+                }
+                if(mOnSlideToEndListener != null) {
+                	mOnSlideToEndListener.onSlideToEnd();
                 }
                 mEnd = true;
                 invalidate();
@@ -634,10 +640,8 @@ public class SliderView extends ViewGroup {
 
                 if(mEnd) {
                 	mEnd = false;
-                	if(mReverse) {
-                		handle.setImageResource(R.drawable.grabber);
-                	} else {
-                		handle.setImageResource(R.drawable.grabber_reverse);
+                	if(mOnSlideToEndListener != null) {
+                		mOnSlideToEndListener.onLeaveEnd();
                 	}
                 }
                 
@@ -917,7 +921,11 @@ public class SliderView extends ViewGroup {
         mOnDrawerScrollListener = onDrawerScrollListener;
     }
 
-    /**
+    public void setOnSlideToEndListener(OnSlideToEndListener onSlideToEndListener) {
+		mOnSlideToEndListener = onSlideToEndListener;
+	}
+
+	/**
      * Returns the handle of the drawer.
      *
      * @return The View reprenseting the handle of the drawer, identified by

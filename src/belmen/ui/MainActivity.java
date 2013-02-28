@@ -3,6 +3,7 @@ package belmen.ui;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.ImageView;
+import belmen.ui.SliderView.OnSlideToEndListener;
 
 public class MainActivity extends Activity {
 
@@ -15,5 +16,16 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		mSlider = (SliderView) findViewById(R.id.main_slider);
 		mHandle = (ImageView) findViewById(R.id.main_handle);
+		mSlider.setOnSlideToEndListener(new OnSlideToEndListener() {
+			@Override
+			public void onSlideToEnd() {
+				mHandle.setImageResource(R.drawable.grabber_reverse);
+			}
+			
+			@Override
+			public void onLeaveEnd() {
+				mHandle.setImageResource(R.drawable.grabber);
+			}
+		});
 	}
 }
