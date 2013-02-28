@@ -227,9 +227,13 @@ public class SliderView extends ViewGroup {
         if (mTracking || mAnimating) {
             final Bitmap cache = mContent.getDrawingCache();
             if (cache != null) {
-            	Logger.i(TAG, "Slider drawwithcache");
+//            	Logger.i(TAG, "Slider draw with cache");
                 if (isVertical) {
-                    canvas.drawBitmap(cache, 0, handle.getBottom(), null);
+                	if(mReverse) {
+                		canvas.drawBitmap(cache, 0, handle.getTop() - cache.getHeight(), null);
+                	} else {
+                		canvas.drawBitmap(cache, 0, handle.getBottom(), null);
+                	}
                 } else {
                 	if(mReverse) {
                 		canvas.drawBitmap(cache, handle.getLeft() - cache.getWidth(), 0, null);
@@ -240,11 +244,11 @@ public class SliderView extends ViewGroup {
             } else {
                 canvas.save();
                 if(mReverse) {
-                	canvas.translate(isVertical ? 0 : handle.getLeft() - getWidth(),
-                            isVertical ? handle.getTop() - mTopOffset : 0);
+                	canvas.translate(isVertical ? 0 : handle.getLeft() - mContent.getWidth() + mTopOffset,
+                            isVertical ? handle.getTop() - mContent.getHeight() + mTopOffset: 0);
                 } else {
                 	canvas.translate(isVertical ? 0 : handle.getRight()/*.getLeft()*/ - mTopOffset,
-                            isVertical ? handle.getTop() - mTopOffset : 0);
+                            isVertical ? handle.getBottom()/*.getTop()*/ - mTopOffset : 0);
                 }
                 drawChild(canvas, mContent, drawingTime);
                 canvas.restore();
@@ -277,10 +281,14 @@ public class SliderView extends ViewGroup {
 
         if (mVertical) {
             childLeft = (width - childWidth) / 2;
-            childTop = mExpanded ? mTopOffset : height - childHeight + mBottomOffset;
+            if(mReverse) {
+            	childTop = mExpanded ? height - childHeight + mBottomOffset : mTopOffset;
+            } else {
+            	childTop = mExpanded ? mTopOffset : height - childHeight + mBottomOffset;
+            }
 
-            content.layout(0, mTopOffset + childHeight, content.getMeasuredWidth(),
-                    mTopOffset + childHeight + content.getMeasuredHeight());
+            content.layout(0, mTopOffset/* + childHeight*/, content.getMeasuredWidth(),
+                    mTopOffset/* + childHeight*/ + content.getMeasuredHeight());
         } else {
         	if(mReverse) {
         		childLeft = mExpanded ? width - childWidth + mBottomOffset : mTopOffset;
@@ -425,8 +433,8 @@ public class SliderView extends ViewGroup {
     
     private boolean isSingleTap(boolean vertical, int top, int left) {
     	if(mReverse) {
-    		return vertical ? (mExpanded && top < mTapThreshold + mTopOffset) ||
-                (!mExpanded && top > mBottomOffset + getBottom() - getTop() -
+    		return vertical ? (mExpanded && top > mTapThreshold + mTopOffset) ||
+                (!mExpanded && top < mBottomOffset + getBottom() - getTop() -
                         mHandleHeight - mTapThreshold) :
                 (!mExpanded && left < mTapThreshold + mTopOffset) ||
                 (mExpanded && left > mBottomOffset + getRight() - getLeft() -
@@ -457,7 +465,7 @@ public class SliderView extends ViewGroup {
 
         if (mExpanded) {
             if (always || sufficientToRetract(position, velocity)) {
-            	// ��״̬���ر�
+            	// 打开状态：关闭
                 // We are expanded, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the expanded position.
             	if(mReverse) {
@@ -472,7 +480,7 @@ public class SliderView extends ViewGroup {
                     }
             	}
             } else {
-            	// ��״̬����λ
+            	// 打开状态：复位
                 // We are expanded and are now going to animate away.
             	if(mReverse) {
             		mAnimatedAcceleration = mMaximumAcceleration;
@@ -488,7 +496,7 @@ public class SliderView extends ViewGroup {
             }
         } else {
             if (!always && sufficientToExpand(position, velocity)) {
-            	// �ر�״̬������ȥ
+            	// 关闭状态：复位
                 // We are collapsed, and they moved enough to allow us to expand.
             	if(mReverse) {
             		mAnimatedAcceleration = -mMaximumAcceleration;
@@ -502,7 +510,7 @@ public class SliderView extends ViewGroup {
                     }
             	}
             } else {
-            	// �ر�״̬�������
+            	// 关闭状态：打开
                 // We are collapsed, but they didn't move sufficiently to cause
                 // us to retract.  Animate back to the collapsed position.
             	if(mReverse) {
@@ -579,14 +587,27 @@ public class SliderView extends ViewGroup {
 
     private void moveHandle(int position) {
         final ImageView handle = mHandle;
-        Logger.i(TAG, "Slider moveHandle=" + position);
+//        Logger.i(TAG, "Slider moveHandle=" + position);
         if (mVertical) {
             if (position == EXPANDED_FULL_OPEN) {
-                handle.offsetTopAndBottom(mTopOffset - handle.getTop());
+            	if(mReverse) {
+            		handle.offsetTopAndBottom(mBottomOffset + getBottom() - getTop() -
+                            mHandleHeight - handle.getTop());
+            	} else {
+            		handle.offsetTopAndBottom(mTopOffset - handle.getTop());
+            	}
+            	if(mOnSlideToEndListener != null) {
+                	mOnSlideToEndListener.onSlideToEnd();
+                }
+                mEnd = true;
                 invalidate();
             } else if (position == COLLAPSED_FULL_CLOSED) {
-                handle.offsetTopAndBottom(mBottomOffset + getBottom() - getTop() -
-                        mHandleHeight - handle.getTop());
+            	if(mReverse) {
+            		handle.offsetTopAndBottom(mTopOffset - handle.getTop());
+            	} else {
+            		handle.offsetTopAndBottom(mBottomOffset + getBottom() - getTop() -
+                            mHandleHeight - handle.getTop());
+            	}
                 invalidate();
             } else {
                 final int top = handle.getTop();
@@ -605,8 +626,20 @@ public class SliderView extends ViewGroup {
                 region.set(frame);
 
                 region.union(frame.left, frame.top - deltaY, frame.right, frame.bottom - deltaY);
-                region.union(0, frame.bottom - deltaY, getWidth(),
-                        frame.bottom - deltaY + mContent.getHeight());
+                if(mReverse) {
+                	region.union(0, frame.top - deltaY - mContent.getHeight(), getWidth(),
+                            frame.top - deltaY);
+                } else {
+                	region.union(0, frame.bottom - deltaY, getWidth(),
+                            frame.bottom - deltaY + mContent.getHeight());
+                }
+                
+                if(mEnd) {
+                	mEnd = false;
+                	if(mOnSlideToEndListener != null) {
+                		mOnSlideToEndListener.onLeaveEnd();
+                	}
+                }
 
                 invalidate(region);
             }
@@ -646,10 +679,15 @@ public class SliderView extends ViewGroup {
 
                 handle.getHitRect(frame);
                 region.set(frame);
-
+                
                 region.union(frame.left - deltaX, frame.top, frame.right - deltaX, frame.bottom);
-                region.union(frame.right - deltaX, 0,
-                        frame.right - deltaX + mContent.getWidth(), getHeight());
+                if(mReverse) {
+                    region.union(frame.left - deltaX - mContent.getWidth(), 0,
+                            frame.left - deltaX, getHeight());
+                } else {
+                    region.union(frame.right - deltaX, 0,
+                            frame.right - deltaX + mContent.getWidth(), getHeight());
+                }
 
                 if(mEnd) {
                 	mEnd = false;
@@ -673,12 +711,12 @@ public class SliderView extends ViewGroup {
         final View content = mContent;
         if (content.isLayoutRequested()) {
             if (mVertical) {
-                final int childHeight = mHandleHeight;
-                int height = getBottom() - getTop() - childHeight - mTopOffset;
+//                final int childHeight = mHandleHeight;
+                int height = getBottom() - getTop()/* - childHeight*/ - mTopOffset;
                 content.measure(MeasureSpec.makeMeasureSpec(getRight() - getLeft(), MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-                content.layout(0, mTopOffset + childHeight, content.getMeasuredWidth(),
-                        mTopOffset + childHeight + content.getMeasuredHeight());
+                content.layout(0, mTopOffset/* + childHeight*/, content.getMeasuredWidth(),
+                        mTopOffset/* + childHeight*/ + content.getMeasuredHeight());
             } else {
 //                final int childWidth = mHandle.getWidth();
                 int width = getRight() - getLeft()/* - childWidth*/ - mTopOffset;
@@ -717,7 +755,7 @@ public class SliderView extends ViewGroup {
         	final int start = mBottomOffset + (mVertical ? getHeight() : getWidth()) - 1;
         	final int end = mTopOffset;
             incrementAnimation();
-            Logger.i(TAG, "Slider AnimationPosition" + mAnimationPosition);
+//            Logger.i(TAG, "Slider AnimationPosition" + mAnimationPosition);
             if (mAnimationPosition >= start) {
                 mAnimating = false;
                 if(mReverse) {

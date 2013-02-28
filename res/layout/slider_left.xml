@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<belmen.ui.SliderView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/belmen.ui"
+    android:id="@+id/main_slider"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:content="@+id/main_content"
+    app:handle="@+id/main_handle"
+    app:position="left" >
+
+    <RelativeLayout
+        android:id="@id/main_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@drawable/background"
+        android:clickable="true" >
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="10dp"
+            android:background="@drawable/bar_frame" />
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@id/main_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/grabber_right" />
+
+</belmen.ui.SliderView>
