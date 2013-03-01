@@ -7,7 +7,7 @@
     android:orientation="vertical"
     app:content="@+id/main_content"
     app:handle="@+id/main_handle"
-    app:position="right" >
+    app:position="bottom" >
 
     <RelativeLayout
         android:id="@id/main_content"
@@ -27,6 +27,6 @@
         android:id="@id/main_handle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/grabber_left" />
+        android:src="@drawable/grabber_up" />
 
 </belmen.ui.SliderView>

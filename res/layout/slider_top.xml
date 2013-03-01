@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    app:topOffset="20dp"
-    app:bottomOffset="40dp"
+    app:fillContent="true"
     app:content="@+id/main_content"
     app:handle="@+id/main_handle"
     app:position="top" >

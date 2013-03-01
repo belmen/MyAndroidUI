@@ -21,6 +21,12 @@
         android:layout="@layout/slider_top" />
     
     <ViewStub
+        android:id="@+id/slider_bottom"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout="@layout/slider_bottom" />
+    
+    <ViewStub
         android:id="@+id/sliding_drawer"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

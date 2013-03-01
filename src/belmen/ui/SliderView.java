@@ -23,8 +23,11 @@ public class SliderView extends ViewGroup {
 	
 	public static final String TAG = SliderView.class.getSimpleName();
 
-	public static final int ORIENTATION_HORIZONTAL = 0;
-    public static final int ORIENTATION_VERTICAL = 1;
+//	public static final int ORIENTATION_HORIZONTAL = 0;
+//    public static final int ORIENTATION_VERTICAL = 1;
+	private static final int POSITION_TOP = 0;
+	private static final int POSITION_MIDDLE = 1;
+	private static final int POSITION_BOTTOM = 2;
 
     private static final int TAP_THRESHOLD = 6;
     private static final float MAXIMUM_TAP_VELOCITY = 100.0f;
@@ -54,11 +57,13 @@ public class SliderView extends ViewGroup {
     private boolean mVertical;
     private boolean mReverse;
     private boolean mExpanded;
-    private boolean mEnd = false;
+    private boolean mFillContent;
     private int mBottomOffset;
     private int mTopOffset;
     private int mHandleHeight;
     private int mHandleWidth;
+    private int mHandlePosition;
+    private int mHandlePositionOffset;
 
     private OnDrawerOpenListener mOnDrawerOpenListener;
     private OnDrawerCloseListener mOnDrawerCloseListener;
@@ -75,6 +80,7 @@ public class SliderView extends ViewGroup {
     private boolean mAnimating;
     private boolean mAllowSingleTap;
     private boolean mAnimateOnClick;
+    private boolean mEnd = false;
 
     private final int mTapThreshold;
     private final int mMaximumTapVelocity;
@@ -139,6 +145,9 @@ public class SliderView extends ViewGroup {
         mTopOffset = (int) a.getDimension(R.styleable.SliderView_topOffset, 0.0f);
         mAllowSingleTap = a.getBoolean(R.styleable.SliderView_allowSingleTap, true);
         mAnimateOnClick = a.getBoolean(R.styleable.SliderView_animateOnClick, true);
+        mHandlePosition = a.getInt(R.styleable.SliderView_handlePosition, POSITION_MIDDLE);
+        mHandlePositionOffset = a.getDimensionPixelSize(R.styleable.SliderView_handlePositionOffset, 0);
+        mFillContent = a.getBoolean(R.styleable.SliderView_fillContent, false);
 
         int handleId = a.getResourceId(R.styleable.SliderView_handle, 0);
         if (handleId == 0) {
@@ -207,10 +216,16 @@ public class SliderView extends ViewGroup {
 
         if (mVertical) {
             int height = heightSpecSize /*- handle.getMeasuredHeight()*/ - mTopOffset;
+            if(!mFillContent) {
+            	height -= handle.getMeasuredHeight();
+            }
             mContent.measure(MeasureSpec.makeMeasureSpec(widthSpecSize, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
         } else {
             int width = widthSpecSize /*- handle.getMeasuredWidth()*/ - mTopOffset;
+            if(!mFillContent) {
+            	width -= handle.getMeasuredWidth();
+            }
             mContent.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(heightSpecSize, MeasureSpec.EXACTLY));
         }
@@ -227,7 +242,6 @@ public class SliderView extends ViewGroup {
         if (mTracking || mAnimating) {
             final Bitmap cache = mContent.getDrawingCache();
             if (cache != null) {
-//            	Logger.i(TAG, "Slider draw with cache");
                 if (isVertical) {
                 	if(mReverse) {
                 		canvas.drawBitmap(cache, 0, handle.getTop() - cache.getHeight(), null);
@@ -247,8 +261,8 @@ public class SliderView extends ViewGroup {
                 	canvas.translate(isVertical ? 0 : handle.getLeft() - mContent.getWidth() + mTopOffset,
                             isVertical ? handle.getTop() - mContent.getHeight() + mTopOffset: 0);
                 } else {
-                	canvas.translate(isVertical ? 0 : handle.getRight()/*.getLeft()*/ - mTopOffset,
-                            isVertical ? handle.getBottom()/*.getTop()*/ - mTopOffset : 0);
+                	canvas.translate(isVertical ? 0 : mFillContent ? handle.getRight() : handle.getLeft()/*.getLeft()*/ - mTopOffset,
+                            isVertical ? mFillContent ? handle.getBottom() : handle.getTop()/*.getTop()*/ - mTopOffset : 0);
                 }
                 drawChild(canvas, mContent, drawingTime);
                 canvas.restore();
@@ -280,26 +294,43 @@ public class SliderView extends ViewGroup {
         final View content = mContent;
 
         if (mVertical) {
-            childLeft = (width - childWidth) / 2;
+        	if(mHandlePosition == POSITION_TOP) {
+        		childLeft = 0;
+        	} else if(mHandlePosition == POSITION_BOTTOM) {
+        		childLeft = width - childWidth;
+        	} else {
+        		childLeft = (width - childWidth) / 2;
+        	}
+        	childLeft += mHandlePositionOffset;
+        	
             if(mReverse) {
             	childTop = mExpanded ? height - childHeight + mBottomOffset : mTopOffset;
+            	content.layout(0, mTopOffset, content.getMeasuredWidth(),
+                        mTopOffset + content.getMeasuredHeight());
             } else {
             	childTop = mExpanded ? mTopOffset : height - childHeight + mBottomOffset;
+            	content.layout(0, mTopOffset + (mFillContent ? 0 : childHeight)/* + childHeight*/, content.getMeasuredWidth(),
+                        mTopOffset + (mFillContent ? 0 : childHeight)/* + childHeight*/ + content.getMeasuredHeight());
             }
-
-            content.layout(0, mTopOffset/* + childHeight*/, content.getMeasuredWidth(),
-                    mTopOffset/* + childHeight*/ + content.getMeasuredHeight());
         } else {
+        	if(mHandlePosition == POSITION_TOP) {
+        		childTop = 0;
+        	} else if(mHandlePosition == POSITION_BOTTOM) {
+        		childTop = height - childHeight;
+        	} else {
+        		childTop = (height - childHeight) / 2;
+        	}
+        	childTop += mHandlePositionOffset;
         	if(mReverse) {
         		childLeft = mExpanded ? width - childWidth + mBottomOffset : mTopOffset;
+        		content.layout(mTopOffset, 0, mTopOffset + content.getMeasuredWidth(),
+        				content.getMeasuredHeight());
         	} else {
         		childLeft = mExpanded ? mTopOffset : width - childWidth + mBottomOffset;
+	    		content.layout(mTopOffset + (mFillContent ? 0 : childWidth)/* + childWidth*/, 0,
+	                    mTopOffset + (mFillContent ? 0 : childWidth)/* + childWidth*/ + content.getMeasuredWidth(),
+	                    content.getMeasuredHeight());
         	}
-            childTop = (height - childHeight) / 4;
-
-            content.layout(mTopOffset/* + childWidth*/, 0,
-                    mTopOffset/* + childWidth*/ + content.getMeasuredWidth(),
-                    content.getMeasuredHeight());            
         }
 
         handle.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
@@ -433,8 +464,8 @@ public class SliderView extends ViewGroup {
     
     private boolean isSingleTap(boolean vertical, int top, int left) {
     	if(mReverse) {
-    		return vertical ? (mExpanded && top > mTapThreshold + mTopOffset) ||
-                (!mExpanded && top < mBottomOffset + getBottom() - getTop() -
+    		return vertical ? (!mExpanded && top < mTapThreshold + mTopOffset) ||
+                (mExpanded && top > mBottomOffset + getBottom() - getTop() -
                         mHandleHeight - mTapThreshold) :
                 (!mExpanded && left < mTapThreshold + mTopOffset) ||
                 (mExpanded && left > mBottomOffset + getRight() - getLeft() -
@@ -711,20 +742,30 @@ public class SliderView extends ViewGroup {
         final View content = mContent;
         if (content.isLayoutRequested()) {
             if (mVertical) {
-//                final int childHeight = mHandleHeight;
-                int height = getBottom() - getTop()/* - childHeight*/ - mTopOffset;
+                final int childHeight = mHandleHeight;
+                int height = getBottom() - getTop() - (mFillContent ? 0 : childHeight)/* - childHeight*/ - mTopOffset;
                 content.measure(MeasureSpec.makeMeasureSpec(getRight() - getLeft(), MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-                content.layout(0, mTopOffset/* + childHeight*/, content.getMeasuredWidth(),
-                        mTopOffset/* + childHeight*/ + content.getMeasuredHeight());
+                if(mReverse) {
+                	content.layout(0, mTopOffset, content.getMeasuredWidth(),
+                            mTopOffset + content.getMeasuredHeight());
+                } else {
+                	content.layout(0, mTopOffset + (mFillContent ? 0 : childHeight)/* + childHeight*/, content.getMeasuredWidth(),
+                            mTopOffset + (mFillContent ? 0 : childHeight)/* + childHeight*/ + content.getMeasuredHeight());
+                }
             } else {
-//                final int childWidth = mHandle.getWidth();
-                int width = getRight() - getLeft()/* - childWidth*/ - mTopOffset;
+                final int childWidth = mHandle.getWidth();
+                int width = getRight() - getLeft() - (mFillContent ? 0 : childWidth)/* - childWidth*/ - mTopOffset;
                 content.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(getBottom() - getTop(), MeasureSpec.EXACTLY));
-                content.layout(/*childWidth + */mTopOffset, 0,
-                        mTopOffset/* + childWidth*/ + content.getMeasuredWidth(),
-                        content.getMeasuredHeight());
+                if(mReverse) {
+                	content.layout(mTopOffset, 0, mTopOffset + content.getMeasuredWidth(),
+                            content.getMeasuredHeight());
+                } else {
+                	content.layout((mFillContent ? 0 : childWidth) + /*childWidth + */mTopOffset, 0,
+                            mTopOffset + (mFillContent ? 0 : childWidth)/* + childWidth*/ + content.getMeasuredWidth(),
+                            content.getMeasuredHeight());
+                }
             }
         }
         // Try only once... we should really loop but it's not a big deal

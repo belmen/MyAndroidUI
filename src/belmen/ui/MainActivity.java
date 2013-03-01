@@ -20,25 +20,27 @@ public class MainActivity extends Activity {
 		ViewStub sliderLeft = (ViewStub) findViewById(R.id.slider_left);
 		ViewStub sliderRight = (ViewStub) findViewById(R.id.slider_right);
 		ViewStub sliderTop = (ViewStub) findViewById(R.id.slider_top);
+		ViewStub sliderBottom = (ViewStub) findViewById(R.id.slider_bottom);
 //		ViewStub slidingDrawerStub = (ViewStub) findViewById(R.id.sliding_drawer);
 //		slidingDrawerStub.inflate();
 		
-		sliderLeft.inflate();
+//		sliderLeft.inflate();
 //		sliderRight.inflate();
-//		sliderTop.inflate();
+		sliderTop.inflate();
+//		sliderBottom.inflate();
 		mSlider = (SliderView) findViewById(R.id.main_slider);
 		mHandle = (ImageView) findViewById(R.id.main_handle);
-		mSlider.setOnSlideToEndListener(new OnSlideToEndListener() {
-			@Override
-			public void onSlideToEnd() {
-				mHandle.setImageResource(R.drawable.grabber_left);
-			}
-			
-			@Override
-			public void onLeaveEnd() {
-				mHandle.setImageResource(R.drawable.grabber_right);
-			}
-		});
+//		mSlider.setOnSlideToEndListener(new OnSlideToEndListener() {
+//			@Override
+//			public void onSlideToEnd() {
+//				mHandle.setImageResource(R.drawable.grabber_left);
+//			}
+//			
+//			@Override
+//			public void onLeaveEnd() {
+//				mHandle.setImageResource(R.drawable.grabber_right);
+//			}
+//		});
 		
 //		mSlider.setOnSlideToEndListener(new OnSlideToEndListener() {
 //			@Override
@@ -52,16 +54,16 @@ public class MainActivity extends Activity {
 //			}
 //		});
 		
-//		mSlider.setOnSlideToEndListener(new OnSlideToEndListener() {
-//			@Override
-//			public void onSlideToEnd() {
-//				mHandle.setImageResource(R.drawable.grabber_up);
-//			}
-//			
-//			@Override
-//			public void onLeaveEnd() {
-//				mHandle.setImageResource(R.drawable.grabber_down);
-//			}
-//		});
+		mSlider.setOnSlideToEndListener(new OnSlideToEndListener() {
+			@Override
+			public void onSlideToEnd() {
+				mHandle.setImageResource(R.drawable.grabber_up);
+			}
+			
+			@Override
+			public void onLeaveEnd() {
+				mHandle.setImageResource(R.drawable.grabber_down);
+			}
+		});
 	}
 }

@@ -27,5 +27,15 @@
         <attr name="allowSingleTap" format="boolean" />
         <!-- Indicates whether the drawer should be opened/closed with an animation when the user clicks the handle. Default is true. -->
         <attr name="animateOnClick" format="boolean" />
+        <!-- Indicates the position of the handle -->
+        <attr name="handlePosition" >
+            <enum name="top" value="0" />
+            <enum name="middle" value="1" />
+            <enum name="bottom" value="2" />
+        </attr>
+        <!--  Indicates the position offset of the handle -->
+        <attr name="handlePositionOffset" format="dimension" />
+        <!-- Wether the content would fill the whole slider -->
+        <attr name="fillContent" format="boolean" />
     </declare-styleable>
 </resources>
