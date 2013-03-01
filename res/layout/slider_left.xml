@@ -4,9 +4,8 @@
     android:id="@+id/main_slider"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    app:handlePosition="bottom"
-    app:handlePositionOffset="-20dp"
+    app:topOffset="20dp"
+    app:fillContent="true"
     app:content="@+id/main_content"
     app:handle="@+id/main_handle"
     app:position="left" >

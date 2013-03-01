@@ -17,7 +17,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.ImageView;
 
 public class SliderView extends ViewGroup {
 	
@@ -44,7 +43,7 @@ public class SliderView extends ViewGroup {
     private final int mHandleId;
     private final int mContentId;
 
-    private ImageView mHandle;
+    private View mHandle;
     private View mContent;
 
     private final Rect mFrame = new Rect();
@@ -184,7 +183,7 @@ public class SliderView extends ViewGroup {
 
 	@Override
     protected void onFinishInflate() {
-        mHandle = (ImageView) findViewById(mHandleId);
+        mHandle = findViewById(mHandleId);
         if (mHandle == null) {
             throw new IllegalArgumentException("The handle attribute is must refer to an"
                     + " existing child.");
@@ -236,12 +235,13 @@ public class SliderView extends ViewGroup {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         final long drawingTime = getDrawingTime();
-        final ImageView handle = mHandle;
+        final View handle = mHandle;
         final boolean isVertical = mVertical;
 
         if (mTracking || mAnimating) {
             final Bitmap cache = mContent.getDrawingCache();
             if (cache != null) {
+            	Logger.i(TAG, "Slider Draw with cache");
                 if (isVertical) {
                 	if(mReverse) {
                 		canvas.drawBitmap(cache, 0, handle.getTop() - cache.getHeight(), null);
@@ -617,7 +617,7 @@ public class SliderView extends ViewGroup {
     }
 
     private void moveHandle(int position) {
-        final ImageView handle = mHandle;
+        final View handle = mHandle;
 //        Logger.i(TAG, "Slider moveHandle=" + position);
         if (mVertical) {
             if (position == EXPANDED_FULL_OPEN) {
