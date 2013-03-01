@@ -2,10 +2,6 @@ package belmen.view;
 
 import java.lang.ref.WeakReference;
 
-import belmen.ui.R;
-import belmen.ui.R.styleable;
-import belmen.util.Logger;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -21,16 +17,35 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.SlidingDrawer;
+import belmen.ui.R;
 
+/**
+ * 一个可以拖动的抽屉，改写自Android的{@link SlidingDrawer}<br/>
+ * 使用方法大致与SlidingDrawer相同，在布局文件中需要指定content和handle<br/>
+ * <br/>
+ * 该类与SlidingDrawer相比有如下改进：<br/>
+ * 1. 可以实现上下左右四方向的拖动，SlidingDrawer只能从下至上或从右至左。<br/>
+ * -- 在布局中通过position属性指定<br/>
+ * 2. 可以指定手柄的位置，而SlidingDrawer只能居中。<br/>
+ * -- 在布局文件中通过handlePosition设定手柄的位置（顶部或左侧、居中、底部或右侧），
+ * 以及handlePositionOffset设定偏移量<br/>
+ * 3. 支持将内容填满整块区域，而SlidingDrawer会为手柄预留一些空间<br/>
+ * -- 在布局文件中设置fillContent为true使内容填满整块区域<br/>
+ * 4. 支持离开顶部的事件监听，设置{@link OnSlideToEndListener}来监听slider贴着顶部/离开顶部的事件<br/>
+ * <br/>
+ * 注意：目前不要使用topOffset和bottomOffset属性，会导致问题<br/>
+ * @author Belmen
+ *
+ * @see SlidingDrawer
+ */
 public class SliderView extends ViewGroup {
 	
 	public static final String TAG = SliderView.class.getSimpleName();
 
-//	public static final int ORIENTATION_HORIZONTAL = 0;
-//    public static final int ORIENTATION_VERTICAL = 1;
-	private static final int POSITION_TOP = 0;
-	private static final int POSITION_MIDDLE = 1;
-	private static final int POSITION_BOTTOM = 2;
+	private static final int HANDLE_POSITION_TOP = 0;
+	private static final int HANDLE_POSITION_MIDDLE = 1;
+	private static final int HANDLE_POSITION_BOTTOM = 2;
 
     private static final int TAP_THRESHOLD = 6;
     private static final float MAXIMUM_TAP_VELOCITY = 100.0f;
@@ -127,8 +142,18 @@ public class SliderView extends ViewGroup {
         public void onScrollEnded();
     }
     
+    /**
+     * Callback invoked when the slider is sliding to the end
+     * @author Belmen
+     */
     public static interface OnSlideToEndListener {
+    	/**
+    	 * Slider完全打开时触发
+    	 */
     	public void onSlideToEnd();
+    	/**
+    	 * Slider离开顶部时触发
+    	 */
     	public void onLeaveEnd();
     }
 	public SliderView(Context context, AttributeSet attrs) {
@@ -148,7 +173,7 @@ public class SliderView extends ViewGroup {
         mTopOffset = (int) a.getDimension(R.styleable.SliderView_topOffset, 0.0f);
         mAllowSingleTap = a.getBoolean(R.styleable.SliderView_allowSingleTap, true);
         mAnimateOnClick = a.getBoolean(R.styleable.SliderView_animateOnClick, true);
-        mHandlePosition = a.getInt(R.styleable.SliderView_handlePosition, POSITION_MIDDLE);
+        mHandlePosition = a.getInt(R.styleable.SliderView_handlePosition, HANDLE_POSITION_MIDDLE);
         mHandlePositionOffset = a.getDimensionPixelSize(R.styleable.SliderView_handlePositionOffset, 0);
         mFillContent = a.getBoolean(R.styleable.SliderView_fillContent, false);
 
@@ -245,7 +270,6 @@ public class SliderView extends ViewGroup {
         if (mTracking || mAnimating) {
             final Bitmap cache = mContent.getDrawingCache();
             if (cache != null) {
-            	Logger.i(TAG, "Slider Draw with cache");
                 if (isVertical) {
                 	if(mReverse) {
                 		canvas.drawBitmap(cache, 0, handle.getTop() - cache.getHeight(), null);
@@ -298,9 +322,9 @@ public class SliderView extends ViewGroup {
         final View content = mContent;
 
         if (mVertical) {
-        	if(mHandlePosition == POSITION_TOP) {
+        	if(mHandlePosition == HANDLE_POSITION_TOP) {
         		childLeft = 0;
-        	} else if(mHandlePosition == POSITION_BOTTOM) {
+        	} else if(mHandlePosition == HANDLE_POSITION_BOTTOM) {
         		childLeft = width - childWidth;
         	} else {
         		childLeft = (width - childWidth) / 2;
@@ -317,9 +341,9 @@ public class SliderView extends ViewGroup {
                         mTopOffset + (mFillContent ? 0 : childHeight)/* + childHeight*/ + content.getMeasuredHeight());
             }
         } else {
-        	if(mHandlePosition == POSITION_TOP) {
+        	if(mHandlePosition == HANDLE_POSITION_TOP) {
         		childTop = 0;
-        	} else if(mHandlePosition == POSITION_BOTTOM) {
+        	} else if(mHandlePosition == HANDLE_POSITION_BOTTOM) {
         		childTop = height - childHeight;
         	} else {
         		childTop = (height - childHeight) / 2;
@@ -440,7 +464,6 @@ public class SliderView extends ViewGroup {
                     if (Math.abs(velocity) < mMaximumTapVelocity) {
                         if (isSingleTap(vertical, top, left)) {
                             if (mAllowSingleTap) {
-                            	Logger.i(TAG, "Slider SingleTap");
                                 playSoundEffect(SoundEffectConstants.CLICK);
 
                                 if (mExpanded) {
@@ -776,7 +799,6 @@ public class SliderView extends ViewGroup {
         // if the draw was cancelled, it will only be temporary anyway
         content.getViewTreeObserver().dispatchOnPreDraw();
         content.buildDrawingCache();
-//        if (!content.isHardwareAccelerated()) content.buildDrawingCache();
 
         content.setVisibility(View.GONE);        
     }
@@ -944,18 +966,6 @@ public class SliderView extends ViewGroup {
             scrollListener.onScrollEnded();
         }
     }
-
-//    @Override
-//    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-//        super.onInitializeAccessibilityEvent(event);
-//        event.setClassName(SliderView.class.getName());
-//    }
-//
-//    @Override
-//    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-//        super.onInitializeAccessibilityNodeInfo(info);
-//        info.setClassName(SliderView.class.getName());
-//    }
 
     private void closeDrawer() {
         moveHandle(COLLAPSED_FULL_CLOSED);

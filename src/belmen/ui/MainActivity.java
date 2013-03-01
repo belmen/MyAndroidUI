@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewStub;
 import android.widget.ImageView;
-import belmen.util.Logger;
 import belmen.view.SliderView;
 import belmen.view.SliderView.OnSlideToEndListener;
 
@@ -22,7 +21,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Logger.setDebug(true);
 		
 		ViewStub sliderLeft = (ViewStub) findViewById(R.id.slider_left);
 		ViewStub sliderRight = (ViewStub) findViewById(R.id.slider_right);
@@ -48,7 +46,7 @@ public class MainActivity extends Activity {
 			break;
 		case RIGHT:
 			sliderRight.inflate();
-//			listener = mRightListener;
+			listener = mRightListener;
 			break;
 		}
 		mSlider = (SliderView) findViewById(R.id.main_slider);

@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="handle" format="reference" />
-    <attr name="content" format="reference" />
-    <attr name="position">
-    	<!-- Panel placed at top of the screen. -->
-        <enum name="top" value="0" />
-        <!-- Panel placed at bottom of the screen. -->
-        <enum name="bottom" value="1" />
-        <!-- Panel placed at left of the screen. -->
-        <enum name="left" value="2" />
-        <!-- Panel placed at right of the screen. -->
-        <enum name="right" value="3" />
-    </attr>
     <declare-styleable name="SliderView">
         <!-- Identifier for the child that represents the drawer's handle. -->
-        <attr name="handle" />
+        <attr name="handle" format="reference" />
         <!-- Identifier for the child that represents the drawer's content. -->
-        <attr name="content" />
+        <attr name="content" format="reference" />
         <!-- Defines panel slider on the screen. -->
-        <attr name="position" />
-        <!-- Extra offset for the handle at the bottom of the SlidingDrawer. -->
+        <attr name="position">
+    	<!-- Panel placed at top of the screen. -->
+	        <enum name="top" value="0" />
+	        <!-- Panel placed at bottom of the screen. -->
+	        <enum name="bottom" value="1" />
+	        <!-- Panel placed at left of the screen. -->
+	        <enum name="left" value="2" />
+	        <!-- Panel placed at right of the screen. -->
+	        <enum name="right" value="3" />
+	    </attr>
+        <!-- Extra offset for the handle at the bottom of the SlidingDrawer. DON'T USE! Use layout margins instead. -->
         <attr name="bottomOffset" format="dimension" />
-        <!-- Extra offset for the handle at the top of the SlidingDrawer. -->
+        <!-- Extra offset for the handle at the top of the SlidingDrawer. DON'T USE! Use layout margins instead. -->
         <attr name="topOffset" format="dimension" />
         <!-- Indicates whether the drawer can be opened/closed by a single tap on the handle. (If false, the user must drag or fling, or click using the trackball, to open/close the drawer.) Default is true. -->
         <attr name="allowSingleTap" format="boolean" />

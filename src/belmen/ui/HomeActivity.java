@@ -1,5 +1,6 @@
 package belmen.ui;
 
+import belmen.util.Logger;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ public class HomeActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Logger.setDebug(true);
 		
 		mListView = getListView();
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mItems);

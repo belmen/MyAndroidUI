@@ -1,7 +1,5 @@
 package belmen.view;
 
-import belmen.ui.R;
-import belmen.ui.R.styleable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -17,6 +15,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
+import belmen.ui.R;
 
 public class SliderViewBackup extends ViewGroup {
 

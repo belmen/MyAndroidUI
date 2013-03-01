@@ -4,7 +4,6 @@
     android:id="@+id/main_slider"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:topOffset="20dp"
     app:fillContent="true"
     app:content="@+id/main_content"
     app:handle="@+id/main_handle"
