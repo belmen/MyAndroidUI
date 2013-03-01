@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewStub;
 import android.widget.ImageView;
-import belmen.ui.SliderView.OnSlideToEndListener;
+import belmen.util.Logger;
+import belmen.view.SliderView;
+import belmen.view.SliderView.OnSlideToEndListener;
 
 public class MainActivity extends Activity {
 	

@@ -1,6 +1,10 @@
-package belmen.ui;
+package belmen.view;
 
 import java.lang.ref.WeakReference;
+
+import belmen.ui.R;
+import belmen.ui.R.styleable;
+import belmen.util.Logger;
 
 import android.content.Context;
 import android.content.res.TypedArray;

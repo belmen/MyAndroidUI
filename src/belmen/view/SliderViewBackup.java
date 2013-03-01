@@ -1,5 +1,7 @@
-package belmen.ui;
+package belmen.view;
 
+import belmen.ui.R;
+import belmen.ui.R.styleable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;

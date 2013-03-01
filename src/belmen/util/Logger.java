@@ -5,7 +5,7 @@
  *  @Project: LibYulong
  *  @author: Robot	
  */
-package belmen.ui;
+package belmen.util;
 
 import android.util.Log;
 
