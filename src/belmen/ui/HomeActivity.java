@@ -13,7 +13,8 @@ import android.widget.ListView;
 public class HomeActivity extends ListActivity {
 
 	private ListView mListView;
-	private String[] mItems = new String[] {"Top", "Bottom", "Left", "Right"};
+	private String[] mItems = new String[] {"Top", "Bottom", "Left", "Right",
+			"LinearLayout", "Scroll", "Sliders", "Gallery"};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +31,22 @@ public class HomeActivity extends ListActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Intent intent = new Intent(HomeActivity.this, MainActivity.class);
-			intent.putExtra("position", position);
-			startActivity(intent);
+			Intent intent = null;
+			if(position == 4) {
+				intent = new Intent(HomeActivity.this, LinearLayoutActivity.class);
+			} else if(position == 5) {
+				intent = new Intent(HomeActivity.this, ScrollActivity.class);
+			} else if(position == 6) {
+				intent = new Intent(HomeActivity.this, SlidersActivity.class);
+			} else if(position == 7) {
+				intent = new Intent(HomeActivity.this, GalleryActivity.class);
+			}  else {
+				intent = new Intent(HomeActivity.this, MainActivity.class);
+				intent.putExtra("position", position);
+			}
+			if(intent != null) {
+				startActivity(intent);
+			}
 		}
 	};
 }

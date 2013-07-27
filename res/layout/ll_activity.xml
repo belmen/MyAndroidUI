@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<belmen.view.PullToRefreshLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ptr="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ll_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#cccccc"
+    android:orientation="vertical"
+    ptr:ptrMode="pullFromStart" >
+    
+    <TextView
+        android:id="@+id/ll_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="文字" />
+    
+
+</belmen.view.PullToRefreshLinearLayout>

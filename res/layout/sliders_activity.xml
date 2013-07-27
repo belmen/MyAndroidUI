@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/menu_bg" >
+    
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onHideClick"
+        android:text="Hide!" />
+    
+    <fragment android:name="belmen.ui.SlidersActivity$MyFragment1"
+        android:id="@+id/my_fragment1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+    <fragment android:name="belmen.ui.SlidersActivity$MyFragment2"
+        android:id="@+id/my_fragment2"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+    <fragment android:name="belmen.ui.SlidersActivity$MyFragment3"
+        android:id="@+id/my_fragment3"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+    <fragment android:name="belmen.ui.SlidersActivity$MyFragment4"
+        android:id="@+id/my_fragment4"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+    <fragment android:name="belmen.ui.SlidersActivity$MyFragment5"
+        android:id="@+id/my_fragment5"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+    
+	<!-- <include layout="@layout/one_slider"
+	    android:id="@+id/slider_1" />
+	<include layout="@layout/one_slider"
+	    android:id="@+id/slider_2" />
+	<include layout="@layout/one_slider"
+	    android:id="@+id/slider_3" />
+	<include layout="@layout/one_slider"
+	    android:id="@+id/slider_4" />
+	<include layout="@layout/one_slider"
+	    android:id="@+id/slider_5" /> -->
+    
+</FrameLayout>
